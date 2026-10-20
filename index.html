@@ -3,18 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Credit Score Detectives</title>
+  <title>Credit Score Detectives - Dossier & Simulation</title>
   <style>
+    /* -------------------------------------------------------------
+       THEME & DESIGN TOKENS (Modern Dark/Slate Detective Aesthetic)
+    ------------------------------------------------------------- */
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --text: #f8fafc;
+      --bg-dark: #0b0f19;
+      --card-bg: #162032;
+      --card-border: #26354a;
+      --accent-cyan: #38bdf8;
+      --accent-amber: #fbbf24;
+      --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --accent: #38bdf8;
-      --accent-hover: #0284c7;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --border: #334155;
+      
+      --pos-green: #22c55e;
+      --pos-bg: rgba(34, 197, 94, 0.15);
+      --neg-red: #ef4444;
+      --neg-bg: rgba(239, 68, 68, 0.15);
+      --neu-slate: #64748b;
+      --neu-bg: rgba(100, 116, 139, 0.2);
+
+      --radius: 12px;
+      --transition: all 0.2s ease-in-out;
     }
 
     * {
@@ -25,515 +36,1213 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      padding: 20px;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 24px 16px;
+      min-height: 100vh;
     }
 
-    .container {
-      max-width: 900px;
+    .app-container {
+      max-width: 960px;
       margin: 0 auto;
     }
 
-    header {
+    /* -------------------------------------------------------------
+       HEADER & STUDENT IDENTIFIER BAR
+    ------------------------------------------------------------- */
+    .app-header {
       text-align: center;
       margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid var(--border);
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }
 
-    header h1 {
-      font-size: 2rem;
-      color: var(--accent);
+    .badge-label {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
       margin-bottom: 8px;
     }
 
-    header p {
-      color: var(--text-muted);
+    .app-header h1 {
+      font-size: 2.2rem;
+      color: var(--text-main);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
     }
 
-    .tabs {
+    .app-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    .student-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .student-bar input {
+      background: var(--bg-dark);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .student-bar input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    /* -------------------------------------------------------------
+       NAVIGATION TABS
+    ------------------------------------------------------------- */
+    .nav-tabs {
       display: flex;
       gap: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       overflow-x: auto;
+      padding-bottom: 4px;
     }
 
-    .tab-btn {
+    .tab-button {
+      flex: 1;
+      min-width: 140px;
       background: var(--card-bg);
       color: var(--text-muted);
-      border: 1px solid var(--border);
-      padding: 10px 16px;
-      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      padding: 12px 16px;
+      border-radius: var(--radius);
       cursor: pointer;
-      font-weight: 600;
-      white-space: nowrap;
-      transition: all 0.2s;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
     }
 
-    .tab-btn.active, .tab-btn:hover {
-      background: var(--accent);
+    .tab-button:hover {
+      border-color: var(--accent-cyan);
+      color: var(--text-main);
+    }
+
+    .tab-button.active {
+      background: var(--accent-cyan);
+      color: #041225;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+    }
+
+    .tab-button.dossier-tab {
+      background: rgba(251, 191, 36, 0.1);
+      border-color: rgba(251, 191, 36, 0.3);
+      color: var(--accent-amber);
+    }
+
+    .tab-button.dossier-tab.active {
+      background: var(--accent-amber);
       color: #000;
-      border-color: var(--accent);
+      border-color: var(--accent-amber);
+      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
     }
 
-    .case-card {
+    /* -------------------------------------------------------------
+       CASE DOSSIER CARDS
+    ------------------------------------------------------------- */
+    .content-panel {
       display: none;
       background: var(--card-bg);
-      border-radius: 12px;
-      padding: 24px;
-      border: 1px solid var(--border);
-      margin-bottom: 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--card-border);
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      margin-bottom: 30px;
     }
 
-    .case-card.active {
+    .content-panel.active {
       display: block;
+      animation: fadeIn 0.3s ease-in-out;
     }
 
-    .case-header {
-      margin-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 12px;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .case-header h2 {
-      color: var(--accent);
-    }
-
-    .profile-info {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 12px;
-      border-radius: 6px;
+    .case-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--card-border);
+      padding-bottom: 16px;
       margin-bottom: 20px;
-      font-size: 0.95rem;
     }
 
-    .item-row {
+    .case-title-row h2 {
+      font-size: 1.4rem;
+      color: var(--text-main);
+      font-weight: 800;
+    }
+
+    .subject-profile {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      background: rgba(11, 15, 25, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+
+    .profile-item {
+      font-size: 0.9rem;
+    }
+
+    .profile-item span {
+      color: var(--text-muted);
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    /* -------------------------------------------------------------
+       SEGMENTED PILL BUTTONS (+ / - / N)
+    ------------------------------------------------------------- */
+    .evidence-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .evidence-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(11, 15, 25, 0.4);
+      border: 1px solid var(--card-border);
+      padding: 12px 16px;
+      border-radius: 10px;
+      gap: 16px;
+      transition: var(--transition);
     }
 
-    .item-text {
+    .evidence-row.graded-correct {
+      border-color: var(--pos-green);
+      background: var(--pos-bg);
+    }
+
+    .evidence-row.graded-incorrect {
+      border-color: var(--neg-red);
+      background: var(--neg-bg);
+    }
+
+    .evidence-desc {
       flex: 1;
+      font-size: 0.95rem;
+      color: #e2e8f0;
     }
 
-    .item-controls select {
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 6px 12px;
+    .segmented-control {
+      display: inline-flex;
+      background: var(--bg-dark);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      gap: 4px;
+    }
+
+    .seg-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 800;
       border-radius: 6px;
       cursor: pointer;
+      transition: var(--transition);
     }
 
-    .score-section {
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 2px dashed var(--border);
+    .seg-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .range-options {
+    .seg-btn[data-val="+"].selected {
+      background: var(--pos-green);
+      color: #000;
+      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+    }
+
+    .seg-btn[data-val="-"].selected {
+      background: var(--neg-red);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+    }
+
+    .seg-btn[data-val="N"].selected {
+      background: var(--neu-slate);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(100, 116, 139, 0.4);
+    }
+
+    /* -------------------------------------------------------------
+       SCORE RANGE SELECTOR
+    ------------------------------------------------------------- */
+    .range-section {
+      border-top: 1px solid var(--card-border);
+      padding-top: 20px;
+    }
+
+    .range-section h3 {
+      font-size: 1.05rem;
+      margin-bottom: 12px;
+      color: var(--accent-cyan);
+    }
+
+    .range-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 10px;
-      margin: 12px 0;
+      margin-bottom: 20px;
     }
 
-    .range-btn {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 10px;
-      border-radius: 6px;
+    .range-pill {
+      background: var(--bg-dark);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 12px;
+      border-radius: 8px;
       cursor: pointer;
       text-align: center;
-      font-size: 0.85rem;
+      transition: var(--transition);
     }
 
-    .range-btn.selected {
-      border-color: var(--accent);
-      background: rgba(56, 189, 248, 0.2);
+    .range-pill .range-name {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 700;
     }
 
-    .action-btn {
-      background: var(--accent);
-      color: #000;
+    .range-pill .range-num {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .range-pill:hover {
+      border-color: var(--accent-cyan);
+    }
+
+    .range-pill.selected {
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.15);
+      box-shadow: 0 0 0 1px var(--accent-cyan);
+    }
+
+    /* -------------------------------------------------------------
+       ACTION BUTTONS & FEEDBACK PANELS
+    ------------------------------------------------------------- */
+    .primary-btn {
+      background: var(--accent-cyan);
+      color: #041225;
       border: none;
-      padding: 12px 24px;
-      font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
       width: 100%;
-      margin-top: 16px;
+      padding: 14px;
+      border-radius: 8px;
       font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: var(--transition);
+      letter-spacing: 0.5px;
     }
 
-    .action-btn:hover {
-      background: var(--accent-hover);
+    .primary-btn:hover {
+      background: #7dd3fc;
+      transform: translateY(-1px);
     }
 
-    .feedback-box {
+    .case-feedback {
       display: none;
       margin-top: 20px;
-      padding: 16px;
+      padding: 20px;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border);
+      background: rgba(11, 15, 25, 0.8);
+      border: 1px solid var(--card-border);
     }
 
-    .feedback-box.show {
+    .case-feedback.active {
       display: block;
+      animation: fadeIn 0.3s ease-in-out;
     }
 
-    .correct { color: var(--success); }
-    .incorrect { color: var(--danger); }
+    .feedback-status {
+      font-weight: 800;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .reveal-box {
+      margin-top: 12px;
+      padding: 12px;
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 6px;
+      color: var(--accent-amber);
+      font-size: 0.9rem;
+    }
+
+    /* -------------------------------------------------------------
+       SUMMARY REPORT DOSSIER (PRINTABLE)
+    ------------------------------------------------------------- */
+    .dossier-header {
+      text-align: center;
+      border-bottom: 2px double var(--card-border);
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+    }
+
+    .dossier-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--bg-dark);
+      border: 1px solid var(--card-border);
+      padding: 20px;
+      border-radius: var(--radius);
+      text-align: center;
+    }
+
+    .stat-card .val {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-card .lbl {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .dossier-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 28px;
+    }
+
+    .dossier-table th, .dossier-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .dossier-table th {
+      background: rgba(11, 15, 25, 0.6);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+    }
+
+    .print-btn {
+      background: var(--accent-amber);
+      color: #000;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .print-btn:hover {
+      background: #fcd34d;
+      transform: translateY(-1px);
+    }
+
+    /* -------------------------------------------------------------
+       PRINT MEDIA STYLES
+    ------------------------------------------------------------- */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+      }
+
+      .app-header, .nav-tabs, .case-card, .primary-btn, .print-btn, .student-bar input {
+        display: none !important;
+      }
+
+      .content-panel {
+        display: none !important;
+      }
+
+      #dossierPanel {
+        display: block !important;
+        background: #fff !important;
+        color: #000 !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+
+      .stat-card {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+
+      .stat-card .val { color: #0f172a !important; }
+      .stat-card .lbl { color: #475569 !important; }
+
+      .dossier-table th, .dossier-table td {
+        border-bottom: 1px solid #cbd5e1 !important;
+        color: #000 !important;
+      }
+
+      .print-header {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+    }
+
+    .print-header { display: none; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <header>
+<div class="app-container">
+  <!-- APP HEADER & STUDENT NAME BAR -->
+  <header class="app-header">
+    <span class="badge-label">FINANCIAL INVESTIGATION UNIT</span>
     <h1>🕵️ Credit Score Detectives</h1>
-    <p>Analyze each financial profile, mark impact values (+ / - / N), and estimate credit scores.</p>
+    <p>Analyze credit profiles, classify line items (+ / - / N), and reveal hidden credit scores.</p>
+    
+    <div class="student-bar">
+      <div class="input-group">
+        <label for="studentName">Detective Name:</label>
+        <input type="text" id="studentName" placeholder="Enter full name" oninput="updateDossier()">
+      </div>
+      <div class="input-group">
+        <label for="studentPeriod">Class Period:</label>
+        <input type="text" id="studentPeriod" placeholder="e.g. Period 3" oninput="updateDossier()">
+      </div>
+    </div>
   </header>
 
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('case1')">Case #1: Jamie</button>
-    <button class="tab-btn" onclick="switchTab('case2')">Case #2: Chris</button>
-    <button class="tab-btn" onclick="switchTab('case3')">Case #3: Taylor</button>
-    <button class="tab-btn" onclick="switchTab('case4')">Case #4: Morgan</button>
-  </div>
+  <!-- NAVIGATION TABS -->
+  <nav class="nav-tabs">
+    <button class="tab-button active" onclick="switchTab('case1', event)">📂 Case #1: Jamie</button>
+    <button class="tab-button" onclick="switchTab('case2', event)">📂 Case #2: Chris</button>
+    <button class="tab-button" onclick="switchTab('case3', event)">📂 Case #3: Taylor</button>
+    <button class="tab-button" onclick="switchTab('case4', event)">📂 Case #4: Morgan</button>
+    <button class="tab-button dossier-tab" onclick="switchTab('dossierPanel', event)">📊 Summary Dossier</button>
+  </nav>
 
-  <!-- CASE 1 -->
-  <div id="case1" class="case-card active">
-    <div class="case-header">
-      <h2>Case #1: Jamie – 24 year old impulse shopper 🛍️</h2>
-    </div>
-    <div class="profile-info">
-      <p><strong>Job:</strong> Retail Associate ($2,500/month income)</p>
-      <p><strong>Monthly Expenses:</strong> $2,650</p>
-    </div>
-
-    <div class="items-list">
-      <div class="item-row" data-key="-">
-        <span class="item-text">Credit Card #1: $3,800 balance (limit $4,000) – pays only minimum ($50/m)</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
-      </div>
-      <div class="item-row" data-key="-">
-        <span class="item-text">Credit Card #2: Maxed out ($1,500 limit) – pays $25/month</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
-      </div>
-      <div class="item-row" data-key="-">
-        <span class="item-text">Store Card: Opened recently, balance $700 (limit $1,000)</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
-      </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Pays student loan on time every month</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
-      </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Personal Loan: $3,000 taken last year – balance $2,200</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
-      </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Made 1 year of on-time payments for credit card</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
-      </div>
-      <div class="item-row" data-key="N">
-        <span class="item-text">Pays rent on time every month</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
-      </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Pays car loan on time every month</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
-      </div>
-      <div class="item-row" data-key="N">
-        <span class="item-text">Pays cell phone bill on time every month</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
-      </div>
-      <div class="item-row" data-key="-">
-        <span class="item-text">Paid one bill late last year because of unexpected car repair</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
-      </div>
-      <div class="item-row" data-key="N">
-        <span class="item-text">Has a low emergency fund ($200 in savings)</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
-      </div>
+  <!-- =========================================================
+       CASE #1: JAMIE
+  ========================================================= -->
+  <div id="case1" class="content-panel case-card active">
+    <div class="case-title-row">
+      <h2>Case #1: Jamie – Impulse Shopper 🛍️</h2>
     </div>
 
-    <div class="score-section">
-      <h3>Estimate Credit Score Range:</h3>
-      <div class="range-options" id="range-case1">
-        <button class="range-btn" onclick="selectRange('case1', 'Poor')">Poor (300 - 579)</button>
-        <button class="range-btn" onclick="selectRange('case1', 'Fair')">Fair (580 - 669)</button>
-        <button class="range-btn" onclick="selectRange('case1', 'Good')">Good (670 - 739)</button>
-        <button class="range-btn" onclick="selectRange('case1', 'Very Good')">Very Good (740 - 799)</button>
-        <button class="range-btn" onclick="selectRange('case1', 'Excellent')">Excellent (800 - 850)</button>
-      </div>
-      <button class="action-btn" onclick="checkCase('case1', 'Poor', '540')">Check Case #1 Answers</button>
-      <div class="feedback-box" id="feedback-case1"></div>
-    </div>
-  </div>
-
-  <!-- CASE 2 -->
-  <div id="case2" class="case-card">
-    <div class="case-header">
-      <h2>Case #2: Chris – 28 year old late payer ⏳</h2>
-    </div>
-    <div class="profile-info">
-      <p><strong>Job:</strong> Freelance Graphic Designer ($3,500/month income)</p>
-      <p><strong>Monthly Expenses:</strong> $3,200</p>
+    <div class="subject-profile">
+      <div class="profile-item"><span>Age / Occupation</span>24 / Retail Associate</div>
+      <div class="profile-item"><span>Monthly Net Income</span>$2,500 / month</div>
+      <div class="profile-item"><span>Monthly Expenses</span>$2,650 / month</div>
     </div>
 
-    <div class="items-list">
-      <div class="item-row" data-key="+">
-        <span class="item-text">Credit Card #1: $200 balance (limit $3,000) – pays in full most months</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+    <div class="evidence-list" id="list-case1">
+      <div class="evidence-row" data-key="-">
+        <span class="evidence-desc">Credit Card #1: $3,800 balance (limit $4,000) – pays minimum ($50/m)</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="-">
-        <span class="item-text">Credit Card #2: $1,500 balance (limit $2,000)</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="-">
+        <span class="evidence-desc">Credit Card #2: Maxed out ($1,500 limit) – pays $25/month</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="-">
-        <span class="item-text">Car Loan: $6,000 left – missed two payments last year</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="-">
+        <span class="evidence-desc">Store Card: Opened recently, balance $700 (limit $1,000)</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Student Loans: $15,000 left – pays on time</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Pays student loan on time every month</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="N">
-        <span class="item-text">Missed cellphone bill payment twice last year</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Personal Loan: $3,000 taken last year – balance paid down to $2,200</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">3 years ago: Took out a car loan and made all payments on time</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Made 1 year of consistent on-time credit card payments</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="-">
-        <span class="item-text">Missed three payments on Credit Card #2</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="N">
+        <span class="evidence-desc">Pays apartment rent on time every month</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="N">
-        <span class="item-text">Missed one credit card payment on Credit Card #1 (by 3 days)</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Pays auto loan on time every month</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="N">
-        <span class="item-text">Missed rent payment 3 times last year</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="N">
+        <span class="evidence-desc">Pays cell phone bill on time every month</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="N">
-        <span class="item-text">Missed electric bill payment twice last year</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="-">
+        <span class="evidence-desc">Paid one bill late last year due to emergency car repair</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
+      </div>
+      <div class="evidence-row" data-key="N">
+        <span class="evidence-desc">Has a low emergency fund savings balance ($200)</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
     </div>
 
-    <div class="score-section">
-      <h3>Estimate Credit Score Range:</h3>
-      <div class="range-options" id="range-case2">
-        <button class="range-btn" onclick="selectRange('case2', 'Poor')">Poor (300 - 579)</button>
-        <button class="range-btn" onclick="selectRange('case2', 'Fair')">Fair (580 - 669)</button>
-        <button class="range-btn" onclick="selectRange('case2', 'Good')">Good (670 - 739)</button>
-        <button class="range-btn" onclick="selectRange('case2', 'Very Good')">Very Good (740 - 799)</button>
-        <button class="range-btn" onclick="selectRange('case2', 'Excellent')">Excellent (800 - 850)</button>
+    <div class="range-section">
+      <h3>Estimate Credit Score Tier:</h3>
+      <div class="range-grid" id="range-case1">
+        <div class="range-pill" onclick="selectRange('case1', 'Poor', this)"><span class="range-name">Poor</span><span class="range-num">300 – 579</span></div>
+        <div class="range-pill" onclick="selectRange('case1', 'Fair', this)"><span class="range-name">Fair</span><span class="range-num">580 – 669</span></div>
+        <div class="range-pill" onclick="selectRange('case1', 'Good', this)"><span class="range-name">Good</span><span class="range-num">670 – 739</span></div>
+        <div class="range-pill" onclick="selectRange('case1', 'Very Good', this)"><span class="range-name">Very Good</span><span class="range-num">740 – 799</span></div>
+        <div class="range-pill" onclick="selectRange('case1', 'Excellent', this)"><span class="range-name">Excellent</span><span class="range-num">800 – 850</span></div>
       </div>
-      <button class="action-btn" onclick="checkCase('case2', 'Poor', '570')">Check Case #2 Answers</button>
-      <div class="feedback-box" id="feedback-case2"></div>
+      <button class="primary-btn" onclick="checkCase('case1', 'Poor', 540)">Submit Case #1 Investigation</button>
+      <div class="case-feedback" id="feedback-case1"></div>
     </div>
   </div>
 
-  <!-- CASE 3 -->
-  <div id="case3" class="case-card">
+  <!-- =========================================================
+       CASE #2: CHRIS
+  ========================================================= -->
+  <div id="case2" class="content-panel case-card">
     <div class="case-header">
-      <h2>Case #3: Taylor – 26 year old Victim of Identity Theft 🕵️</h2>
-    </div>
-    <div class="profile-info">
-      <p><strong>Job:</strong> Software Developer ($4,500/month income)</p>
-      <p><strong>Monthly Expenses:</strong> $3,850</p>
+      <h2>Case #2: Chris – Late Payer ⏳</h2>
     </div>
 
-    <div class="items-list">
-      <div class="item-row" data-key="+">
-        <span class="item-text">Credit Card #1: $500 balance (limit $5,000) – pays in full each month</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+    <div class="subject-profile">
+      <div class="profile-item"><span>Age / Occupation</span>28 / Freelance Graphic Designer</div>
+      <div class="profile-item"><span>Monthly Net Income</span>$3,500 / month</div>
+      <div class="profile-item"><span>Monthly Expenses</span>$3,200 / month</div>
+    </div>
+
+    <div class="evidence-list" id="list-case2">
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Credit Card #1: $200 balance (limit $3,000) – pays in full most months</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Car Loan: $8,000 left – pays on time</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="-">
+        <span class="evidence-desc">Credit Card #2: $1,500 balance (limit $2,000)</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Student Loan: $12,000 left – pays $200/month on time</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="-">
+        <span class="evidence-desc">Car Loan: $6,000 balance – missed two payments last year</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">4 years ago: Opened first credit card, always paid on time</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Student Loans: $15,000 remaining – pays on time</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">3 years ago: Took out a car loan, made all payments on time</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="N">
+        <span class="evidence-desc">Missed cellphone bill payment twice last year</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="-">
-        <span class="item-text">2 years ago: Discovered severe fraud on accounts opened in their name</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">3 years ago: Took out auto loan and made all payments on time</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">1 year ago: Resolved identity theft issues, rebuilding credit</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="-">
+        <span class="evidence-desc">Missed three scheduled payments on Credit Card #2</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Keeps credit utilization low (under 10%)</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="N">
+        <span class="evidence-desc">Late by 3 days on Credit Card #1 (Grace period applied)</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="N">
-        <span class="item-text">Pays rent on time</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="N">
+        <span class="evidence-desc">Missed rent payment deadline 3 times last year</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="N">
-        <span class="item-text">Pays electric bill on time</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="N">
+        <span class="evidence-desc">Missed electric utility bill twice last year</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
     </div>
 
-    <div class="score-section">
-      <h3>Estimate Credit Score Range:</h3>
-      <div class="range-options" id="range-case3">
-        <button class="range-btn" onclick="selectRange('case3', 'Poor')">Poor (300 - 579)</button>
-        <button class="range-btn" onclick="selectRange('case3', 'Fair')">Fair (580 - 669)</button>
-        <button class="range-btn" onclick="selectRange('case3', 'Good')">Good (670 - 739)</button>
-        <button class="range-btn" onclick="selectRange('case3', 'Very Good')">Very Good (740 - 799)</button>
-        <button class="range-btn" onclick="selectRange('case3', 'Excellent')">Excellent (800 - 850)</button>
+    <div class="range-section">
+      <h3>Estimate Credit Score Tier:</h3>
+      <div class="range-grid" id="range-case2">
+        <div class="range-pill" onclick="selectRange('case2', 'Poor', this)"><span class="range-name">Poor</span><span class="range-num">300 – 579</span></div>
+        <div class="range-pill" onclick="selectRange('case2', 'Fair', this)"><span class="range-name">Fair</span><span class="range-num">580 – 669</span></div>
+        <div class="range-pill" onclick="selectRange('case2', 'Good', this)"><span class="range-name">Good</span><span class="range-num">670 – 739</span></div>
+        <div class="range-pill" onclick="selectRange('case2', 'Very Good', this)"><span class="range-name">Very Good</span><span class="range-num">740 – 799</span></div>
+        <div class="range-pill" onclick="selectRange('case2', 'Excellent', this)"><span class="range-name">Excellent</span><span class="range-num">800 – 850</span></div>
       </div>
-      <button class="action-btn" onclick="checkCase('case3', 'Very Good', '750')">Check Case #3 Answers</button>
-      <div class="feedback-box" id="feedback-case3"></div>
+      <button class="primary-btn" onclick="checkCase('case2', 'Poor', 570)">Submit Case #2 Investigation</button>
+      <div class="case-feedback" id="feedback-case2"></div>
     </div>
   </div>
 
-  <!-- CASE 4 -->
-  <div id="case4" class="case-card">
+  <!-- =========================================================
+       CASE #3: TAYLOR
+  ========================================================= -->
+  <div id="case3" class="content-panel case-card">
     <div class="case-header">
-      <h2>Case #4: Morgan – 30 year old Credit Master 💳</h2>
-    </div>
-    <div class="profile-info">
-      <p><strong>Job:</strong> Marketing Manager ($5,000/month income)</p>
-      <p><strong>Monthly Expenses:</strong> $3,800</p>
+      <h2>Case #3: Taylor – Fraud Recovery Victim 🛡️</h2>
     </div>
 
-    <div class="items-list">
-      <div class="item-row" data-key="+">
-        <span class="item-text">Credit Card #1: $500 balance (limit $5,000) – pays in full</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+    <div class="subject-profile">
+      <div class="profile-item"><span>Age / Occupation</span>26 / Software Developer</div>
+      <div class="profile-item"><span>Monthly Net Income</span>$4,500 / month</div>
+      <div class="profile-item"><span>Monthly Expenses</span>$3,850 / month</div>
+    </div>
+
+    <div class="evidence-list" id="list-case3">
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Credit Card #1: $500 balance (limit $5,000) – pays in full</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="-">
-        <span class="item-text">Credit Card #2: $2,800 balance (limit $3,000) – high utilization</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Car Loan: $8,000 balance remaining – always pays on time</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Car Loan: $5,000 left – pays on time</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Student Loan: $12,000 left – pays $200/month consistently</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Boat Loan: Paid every payment on time, paid off</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">4 years ago: Opened first credit card, perfect payment history</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">ATV Loan: $5,000 left – pays on time</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">3 years ago: Auto loan executed and repaid on schedule</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Camper Loan: Paid every payment on time, paid off</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="-">
+        <span class="evidence-desc">2 years ago: Discovered severe fraud / identity theft on unauthorized account</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Student Loan: $10,000 left – pays $150/month on time</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">1 year ago: Fully cleared identity theft dispute with credit bureaus</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="N">
-        <span class="item-text">1 year ago: Opened emergency savings fund ($5,000)</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Maintains total credit utilization below 10%</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
-      <div class="item-row" data-key="+">
-        <span class="item-text">Pays all bills on time</span>
-        <div class="item-controls"><select><option value="">Select</option><option value="+">+</option><option value="-">-</option><option value="N">N</option></select></div>
+      <div class="evidence-row" data-key="N">
+        <span class="evidence-desc">Pays rent on time each month</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
+      </div>
+      <div class="evidence-row" data-key="N">
+        <span class="evidence-desc">Pays electric and power bills on time</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
       </div>
     </div>
 
-    <div class="score-section">
-      <h3>Estimate Credit Score Range:</h3>
-      <div class="range-options" id="range-case4">
-        <button class="range-btn" onclick="selectRange('case4', 'Poor')">Poor (300 - 579)</button>
-        <button class="range-btn" onclick="selectRange('case4', 'Fair')">Fair (580 - 669)</button>
-        <button class="range-btn" onclick="selectRange('case4', 'Good')">Good (670 - 739)</button>
-        <button class="range-btn" onclick="selectRange('case4', 'Very Good')">Very Good (740 - 799)</button>
-        <button class="range-btn" onclick="selectRange('case4', 'Excellent')">Excellent (800 - 850)</button>
+    <div class="range-section">
+      <h3>Estimate Credit Score Tier:</h3>
+      <div class="range-grid" id="range-case3">
+        <div class="range-pill" onclick="selectRange('case3', 'Poor', this)"><span class="range-name">Poor</span><span class="range-num">300 – 579</span></div>
+        <div class="range-pill" onclick="selectRange('case3', 'Fair', this)"><span class="range-name">Fair</span><span class="range-num">580 – 669</span></div>
+        <div class="range-pill" onclick="selectRange('case3', 'Good', this)"><span class="range-name">Good</span><span class="range-num">670 – 739</span></div>
+        <div class="range-pill" onclick="selectRange('case3', 'Very Good', this)"><span class="range-name">Very Good</span><span class="range-num">740 – 799</span></div>
+        <div class="range-pill" onclick="selectRange('case3', 'Excellent', this)"><span class="range-name">Excellent</span><span class="range-num">800 – 850</span></div>
       </div>
-      <button class="action-btn" onclick="checkCase('case4', 'Very Good', '790')">Check Case #4 Answers</button>
-      <div class="feedback-box" id="feedback-case4"></div>
+      <button class="primary-btn" onclick="checkCase('case3', 'Very Good', 750)">Submit Case #3 Investigation</button>
+      <div class="case-feedback" id="feedback-case3"></div>
     </div>
+  </div>
+
+  <!-- =========================================================
+       CASE #4: MORGAN
+  ========================================================= -->
+  <div id="case4" class="content-panel case-card">
+    <div class="case-header">
+      <h2>Case #4: Morgan – Credit Builder 💎</h2>
+    </div>
+
+    <div class="subject-profile">
+      <div class="profile-item"><span>Age / Occupation</span>30 / Marketing Director</div>
+      <div class="profile-item"><span>Monthly Net Income</span>$5,000 / month</div>
+      <div class="profile-item"><span>Monthly Expenses</span>$3,800 / month</div>
+    </div>
+
+    <div class="evidence-list" id="list-case4">
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Credit Card #1: $500 balance (limit $5,000) – pays in full</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
+      </div>
+      <div class="evidence-row" data-key="-">
+        <span class="evidence-desc">Credit Card #2: $2,800 balance (limit $3,000) – high utilization</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
+      </div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Car Loan: $5,000 left – always pays on time</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
+      </div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Boat Loan: Made every payment on time, loan fully paid off</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
+      </div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">ATV Loan: $5,000 remaining – active on-time payments</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
+      </div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Camper Loan: Made every payment on time, loan paid off</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
+      </div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">Student Loan: $10,000 left – pays $150/month on schedule</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
+      </div>
+      <div class="evidence-row" data-key="N">
+        <span class="evidence-desc">Opened emergency high-yield savings account ($5,000)</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
+      </div>
+      <div class="evidence-row" data-key="+">
+        <span class="evidence-desc">100% on-time payment history across all active accounts</span>
+        <div class="segmented-control">
+          <button class="seg-btn" data-val="+" onclick="selectSeg(this)">+</button>
+          <button class="seg-btn" data-val="-" onclick="selectSeg(this)">-</button>
+          <button class="seg-btn" data-val="N" onclick="selectSeg(this)">N</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="range-section">
+      <h3>Estimate Credit Score Tier:</h3>
+      <div class="range-grid" id="range-case4">
+        <div class="range-pill" onclick="selectRange('case4', 'Poor', this)"><span class="range-name">Poor</span><span class="range-num">300 – 579</span></div>
+        <div class="range-pill" onclick="selectRange('case4', 'Fair', this)"><span class="range-name">Fair</span><span class="range-num">580 – 669</span></div>
+        <div class="range-pill" onclick="selectRange('case4', 'Good', this)"><span class="range-name">Good</span><span class="range-num">670 – 739</span></div>
+        <div class="range-pill" onclick="selectRange('case4', 'Very Good', this)"><span class="range-name">Very Good</span><span class="range-num">740 – 799</span></div>
+        <div class="range-pill" onclick="selectRange('case4', 'Excellent', this)"><span class="range-name">Excellent</span><span class="range-num">800 – 850</span></div>
+      </div>
+      <button class="primary-btn" onclick="checkCase('case4', 'Very Good', 790)">Submit Case #4 Investigation</button>
+      <div class="case-feedback" id="feedback-case4"></div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       SUMMARY REPORT DOSSIER (PRINTABLE)
+  ========================================================= -->
+  <div id="dossierPanel" class="content-panel">
+    <div class="print-header">
+      <h1>Credit Score Detectives - Official Performance Dossier</h1>
+      <p>Financial Literacy Investigation Unit</p>
+      <hr style="margin: 12px 0;">
+    </div>
+
+    <div class="dossier-header">
+      <h2>📊 Official Detective Evaluation Dossier</h2>
+      <p style="color: var(--text-muted);">Case Analysis Summary & Verification Report</p>
+    </div>
+
+    <div class="dossier-stats-grid">
+      <div class="stat-card">
+        <div class="val" id="dosName">--</div>
+        <div class="lbl">Detective Name</div>
+      </div>
+      <div class="stat-card">
+        <div class="val" id="dosPeriod">--</div>
+        <div class="lbl">Class Period</div>
+      </div>
+      <div class="stat-card">
+        <div class="val" id="dosAccuracy">0%</div>
+        <div class="lbl">Total Accuracy Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="val" id="dosScore">0 / 40</div>
+        <div class="lbl">Total Evidence Points</div>
+      </div>
+    </div>
+
+    <table class="dossier-table">
+      <thead>
+        <tr>
+          <th>Case Subject</th>
+          <th>Evidence Correct</th>
+          <th>Tier Range Guess</th>
+          <th>Actual Revealed Score</th>
+          <th>Case Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Case #1: Jamie</td>
+          <td id="dosCase1Score">0 / 11</td>
+          <td id="dosCase1Range">Not Selected</td>
+          <td>540 (Poor)</td>
+          <td id="dosCase1Status">Pending</td>
+        </tr>
+        <tr>
+          <td>Case #2: Chris</td>
+          <td id="dosCase2Score">0 / 10</td>
+          <td id="dosCase2Range">Not Selected</td>
+          <td>570 (Poor)</td>
+          <td id="dosCase2Status">Pending</td>
+        </tr>
+        <tr>
+          <td>Case #3: Taylor</td>
+          <td id="dosCase3Score">0 / 10</td>
+          <td id="dosCase3Range">Not Selected</td>
+          <td>750 (Very Good)</td>
+          <td id="dosCase3Status">Pending</td>
+        </tr>
+        <tr>
+          <td>Case #4: Morgan</td>
+          <td id="dosCase4Score">0 / 9</td>
+          <td id="dosCase4Range">Not Selected</td>
+          <td>790 (Very Good)</td>
+          <td id="dosCase4Status">Pending</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="print-btn" onclick="window.print()">
+      🖨️ Print / Export Dossier PDF
+    </button>
   </div>
 </div>
 
 <script>
-  const selectedRanges = {};
+  /* Global State Tracker */
+  const state = {
+    selectedRanges: {},
+    caseResults: {
+      case1: { itemsCorrect: 0, total: 11, rangeCorrect: false, checked: false },
+      case2: { itemsCorrect: 0, total: 10, rangeCorrect: false, checked: false },
+      case3: { itemsCorrect: 0, total: 10, rangeCorrect: false, checked: false },
+      case4: { itemsCorrect: 0, total: 9, rangeCorrect: false, checked: false }
+    }
+  };
 
-  function switchTab(caseId) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.case-card').forEach(card => card.classList.remove('active'));
-    
-    event.target.classList.add('active');
-    document.getElementById(caseId).classList.add('active');
+  /* Tab Navigation Function */
+  function switchTab(panelId, evt) {
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.content-panel').forEach(panel => panel.classList.remove('active'));
+
+    if (evt && evt.currentTarget) {
+      evt.currentTarget.classList.add('active');
+    }
+
+    document.getElementById(panelId).classList.add('active');
+    if (panelId === 'dossierPanel') {
+      updateDossier();
+    }
   }
 
-  function selectRange(caseId, value) {
-    selectedRanges[caseId] = value;
-    const container = document.getElementById(`range-${caseId}`);
-    container.querySelectorAll('.range-btn').forEach(btn => {
-      btn.classList.remove('selected');
-      if (btn.innerText.includes(value)) btn.classList.add('selected');
-    });
+  /* Segmented Pill Selection (+ / - / N) */
+  function selectSeg(button) {
+    const parentControl = button.parentElement;
+    parentControl.querySelectorAll('.seg-btn').forEach(btn => btn.classList.remove('selected'));
+    button.classList.add('selected');
   }
 
+  /* Score Range Selector */
+  function selectRange(caseId, rangeValue, element) {
+    state.selectedRanges[caseId] = rangeValue;
+    const grid = document.getElementById(`range-${caseId}`);
+    grid.querySelectorAll('.range-pill').forEach(pill => pill.classList.remove('selected'));
+    element.classList.add('selected');
+  }
+
+  /* Case Evaluation Function */
   function checkCase(caseId, correctRange, actualScore) {
     const card = document.getElementById(caseId);
-    const rows = card.querySelectorAll('.item-row');
-    let correctCount = 0;
-    let totalItems = rows.length;
+    const rows = card.querySelectorAll('.evidence-row');
+    let correctItems = 0;
 
     rows.forEach(row => {
-      const select = row.querySelector('select');
-      const userVal = select.value;
-      const keyVal = row.dataset.key;
+      const selectedBtn = row.querySelector('.seg-btn.selected');
+      const userVal = selectedBtn ? selectedBtn.dataset.val : null;
+      const expectedVal = row.dataset.key;
 
-      if (userVal === keyVal) {
-        select.style.borderColor = 'var(--success)';
-        select.style.background = 'rgba(34, 197, 94, 0.2)';
-        correctCount++;
+      row.classList.remove('graded-correct', 'graded-incorrect');
+
+      if (userVal === expectedVal) {
+        row.classList.add('graded-correct');
+        correctItems++;
       } else {
-        select.style.borderColor = 'var(--danger)';
-        select.style.background = 'rgba(239, 68, 68, 0.2)';
+        row.classList.add('graded-incorrect');
       }
     });
 
-    const userRange = selectedRanges[caseId] || 'None';
-    const rangeCorrect = (userRange === correctRange);
+    const userRange = state.selectedRanges[caseId] || 'None';
+    const isRangeCorrect = (userRange === correctRange);
 
+    /* Update State */
+    state.caseResults[caseId].itemsCorrect = correctItems;
+    state.caseResults[caseId].rangeCorrect = isRangeCorrect;
+    state.caseResults[caseId].checked = true;
+
+    /* Render Feedback Box */
     const feedback = document.getElementById(`feedback-${caseId}`);
-    feedback.classList.add('show');
+    feedback.classList.add('active');
     feedback.innerHTML = `
-      <h4>Results Summary:</h4>
-      <p>Items Correct: <strong>${correctCount} / ${totalItems}</strong></p>
-      <p>Selected Range: <strong>${userRange}</strong> (${rangeCorrect ? '<span class="correct">Correct!</span>' : '<span class="incorrect">Incorrect</span>'})</p>
-      <hr style="margin: 10px 0; border-color: var(--border);">
-      <p>💡 <strong>Actual Credit Score Revealed: ${actualScore}</strong> (${correctRange} Range)</p>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
-        *Note: Standard rent, utility, and cell phone payments are marked as <strong>N (No Impact)</strong> because they generally do not report to standard credit bureaus unless severely past due or using specialized reporting services. Savings/Emergency funds also do not affect credit scores.
-      </p>
+      <div class="feedback-status" style="color: ${isRangeCorrect ? 'var(--pos-green)' : 'var(--accent-amber)'}">
+        ${isRangeCorrect ? '🎯 Accurate Score Estimation!' : '⚠️ Score Estimation Off Target'}
+      </div>
+      <p>Evidence Classification: <strong>${correctItems} / ${rows.length} Items Correct</strong></p>
+      <p>Your Estimated Range: <strong>${userRange}</strong> | Correct Range: <strong>${correctRange}</strong></p>
+      <div class="reveal-box">
+        🔍 <strong>Actual Revealed Credit Score: ${actualScore}</strong>
+        <br><small>*Note: Standard rent, utility, and phone bills do not affect credit scores (N) unless sent to collections. Savings accounts also do not impact scores.</small>
+      </div>
     `;
+
+    updateDossier();
+  }
+
+  /* Update Summary Dossier Tab */
+  function updateDossier() {
+    const sName = document.getElementById('studentName').value.trim() || 'Unassigned';
+    const sPeriod = document.getElementById('studentPeriod').value.trim() || 'N/A';
+
+    document.getElementById('dosName').innerText = sName;
+    document.getElementById('dosPeriod').innerText = sPeriod;
+
+    let totalPoints = 0;
+    let maxPoints = 40;
+
+    Object.keys(state.caseResults).forEach(cId => {
+      const res = state.caseResults[cId];
+      totalPoints += res.itemsCorrect;
+      
+      const scoreElem = document.getElementById(`dos${capitalize(cId)}Score`);
+      const rangeElem = document.getElementById(`dos${capitalize(cId)}Range`);
+      const statusElem = document.getElementById(`dos${capitalize(cId)}Status`);
+
+      if (scoreElem) scoreElem.innerText = `${res.itemsCorrect} / ${res.total}`;
+      if (rangeElem) rangeElem.innerText = state.selectedRanges[cId] || 'Not Selected';
+      if (statusElem) {
+        statusElem.innerText = res.checked ? 'Completed' : 'Pending';
+        statusElem.style.color = res.checked ? 'var(--pos-green)' : 'var(--accent-amber)';
+      }
+    });
+
+    const accuracyPct = Math.round((totalPoints / maxPoints) * 100);
+    document.getElementById('dosScore').innerText = `${totalPoints} / ${maxPoints}`;
+    document.getElementById('dosAccuracy').innerText = `${accuracyPct}%`;
+  }
+
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 </script>
 
