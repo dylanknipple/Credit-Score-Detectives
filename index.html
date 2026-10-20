@@ -69,9 +69,6 @@
       font-size: 1.1rem;
       color: var(--accent);
       margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .instructions-card ul {
@@ -84,15 +81,17 @@
       margin-bottom: 4px;
     }
 
-    /* STUDENT INFO HEADER */
+    /* STUDENT INFO HEADER & LOCK */
     .student-bar {
       display: flex;
       gap: 12px;
       margin-bottom: 20px;
       background: var(--card-bg);
-      padding: 12px 16px;
+      padding: 14px 16px;
       border-radius: 10px;
       border: 1px solid var(--border);
+      align-items: center;
+      flex-wrap: wrap;
     }
 
     .student-bar input {
@@ -103,7 +102,28 @@
       border-radius: 6px;
       font-size: 0.95rem;
       flex: 1;
+      min-width: 180px;
     }
+
+    .student-bar input:disabled {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--accent);
+      border-color: var(--accent);
+      font-weight: bold;
+    }
+
+    .lock-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .lock-btn:hover { background: var(--accent-hover); }
 
     /* TABS */
     .tabs {
@@ -149,14 +169,6 @@
       margin-bottom: 12px;
     }
 
-    .profile-info {
-      background: var(--card-inner);
-      padding: 14px 18px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border);
-    }
-
     /* SEGMENTED PILL BUTTONS (+ / - / N) */
     .item-row {
       display: flex;
@@ -167,6 +179,10 @@
       border-radius: 8px;
       border: 1px solid var(--border);
       transition: all 0.2s;
+    }
+
+    .item-row.income-row {
+      border-left: 4px solid var(--accent);
     }
 
     .item-main {
@@ -264,9 +280,7 @@
       font-size: 1rem;
     }
 
-    .action-btn:hover {
-      background: var(--accent-hover);
-    }
+    .action-btn:hover { background: var(--accent-hover); }
 
     .case-feedback {
       display: none;
@@ -277,9 +291,7 @@
       border: 1px solid var(--border);
     }
 
-    .case-feedback.show {
-      display: block;
-    }
+    .case-feedback.show { display: block; }
 
     .correct { color: var(--success); font-weight: bold; }
     .incorrect { color: var(--danger); font-weight: bold; }
@@ -289,7 +301,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px;
-      margin-bottom: 20px;
+      margin: 20px 0;
     }
 
     .dossier-card {
@@ -312,9 +324,19 @@
       color: var(--accent);
     }
 
+    .watermark {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px dashed var(--accent);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+
     @media print {
       body { background: #fff; color: #000; padding: 0; }
-      .tabs, .instructions-card, .action-btn { display: none !important; }
+      .tabs, .instructions-card, .action-btn, .student-bar button { display: none !important; }
       .case-card { display: block !important; border: 1px solid #ccc; background: #fff; color: #000; }
       .pill-btn.selected { border: 1px solid #000; }
     }
@@ -332,16 +354,17 @@
   <div class="instructions-card">
     <h2>🔍 Detective Instructions</h2>
     <ul>
-      <li><strong>Step 1:</strong> Read the profile details for each case suspect.</li>
-      <li><strong>Step 2:</strong> Mark each line item as <strong>+</strong> (Positive Impact), <strong>-</strong> (Negative Impact), or <strong>N</strong> (No Impact) on standard credit reports.</li>
-      <li><strong>Step 3:</strong> Select the suspect's overall Credit Score Range based on their financial history.</li>
-      <li><strong>Step 4:</strong> Click <strong>"Check Case Answers"</strong> to submit, see incorrect answer feedback, and reveal their actual credit score!</li>
+      <li><strong>Step 1:</strong> Enter and lock your full name and class period below.</li>
+      <li><strong>Step 2:</strong> Evaluate every line item—including income and monthly expenses—and mark them as <strong>+</strong> (Positive), <strong>-</strong> (Negative), or <strong>N</strong> (No Impact).</li>
+      <li><strong>Step 3:</strong> Select the estimated Credit Score Range for each suspect.</li>
+      <li><strong>Step 4:</strong> Click <strong>"Check Case Answers"</strong> to get detailed feedback and generate your final Summary Dossier.</li>
     </ul>
   </div>
 
   <div class="student-bar">
     <input type="text" id="student-name" placeholder="Student Full Name">
     <input type="text" id="student-period" placeholder="Class Period / Section">
+    <button class="lock-btn" id="lock-btn" onclick="lockStudentInfo()">🔒 Lock Name & Info</button>
   </div>
 
   <div class="tabs">
@@ -357,15 +380,35 @@
     <div class="case-header">
       <h2>Case #1: Jamie – 24 year old impulse shopper 🛍️</h2>
     </div>
-    <div class="profile-info">
-      <p><strong>Job:</strong> Retail Associate ($2,500/month income)</p>
-      <p><strong>Monthly Expenses:</strong> $2,650</p>
-    </div>
 
     <div class="items-list">
+      <div class="item-row income-row" data-key="N" data-reason="INCOME HAS NO IMPACT: Job status, salary, and hourly income are NEVER listed on credit reports and have 0 impact on credit scores.">
+        <div class="item-main">
+          <span class="item-text"><strong>Job Income:</strong> Retail Associate ($2,500/month income)</span>
+          <div class="pill-group">
+            <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
+            <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
+            <button class="pill-btn" data-val="N" onclick="setPill(this)">N</button>
+          </div>
+        </div>
+        <div class="item-explanation"></div>
+      </div>
+
+      <div class="item-row income-row" data-key="N" data-reason="EXPENSES HAVE NO IMPACT: Personal budget expenses and living costs are NOT tracked on credit reports and do NOT calculate into credit scores.">
+        <div class="item-main">
+          <span class="item-text"><strong>Monthly Expenses:</strong> $2,650/month</span>
+          <div class="pill-group">
+            <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
+            <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
+            <button class="pill-btn" data-val="N" onclick="setPill(this)">N</button>
+          </div>
+        </div>
+        <div class="item-explanation"></div>
+      </div>
+
       <div class="item-row" data-key="-" data-reason="High credit card utilization (>90%) severely harms your credit score.">
         <div class="item-main">
-          <span class="item-text">Credit Card #1: $3,800 balance (limit $4,000) – pays only minimum ($50/m)</span>
+          <span class="item-text">Credit Card #1: $3,800 balance (limit $4,000) – pays minimum ($50/m)</span>
           <div class="pill-group">
             <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
             <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
@@ -483,7 +526,7 @@
         <div class="item-explanation"></div>
       </div>
 
-      <div class="item-row" data-key="N" data-reason="Bank savings accounts and emergency funds are private and NOT tracked on credit reports.">
+      <div class="item-row" data-key="N" data-reason="Bank savings accounts and emergency funds are private assets and NOT tracked on credit reports.">
         <div class="item-main">
           <span class="item-text">Has a low emergency fund ($200 in savings)</span>
           <div class="pill-group">
@@ -515,12 +558,32 @@
     <div class="case-header">
       <h2>Case #2: Chris – 28 year old late payer ⏳</h2>
     </div>
-    <div class="profile-info">
-      <p><strong>Job:</strong> Freelance Graphic Designer ($3,500/month income)</p>
-      <p><strong>Monthly Expenses:</strong> $3,200</p>
-    </div>
 
     <div class="items-list">
+      <div class="item-row income-row" data-key="N" data-reason="INCOME HAS NO IMPACT: Freelance income status or total monthly earnings are NOT tracked on credit reports.">
+        <div class="item-main">
+          <span class="item-text"><strong>Job Income:</strong> Freelance Graphic Designer ($3,500/month income)</span>
+          <div class="pill-group">
+            <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
+            <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
+            <button class="pill-btn" data-val="N" onclick="setPill(this)">N</button>
+          </div>
+        </div>
+        <div class="item-explanation"></div>
+      </div>
+
+      <div class="item-row income-row" data-key="N" data-reason="EXPENSES HAVE NO IMPACT: Personal monthly living costs ($3,200) do NOT calculate into credit scores.">
+        <div class="item-main">
+          <span class="item-text"><strong>Monthly Expenses:</strong> $3,200/month</span>
+          <div class="pill-group">
+            <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
+            <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
+            <button class="pill-btn" data-val="N" onclick="setPill(this)">N</button>
+          </div>
+        </div>
+        <div class="item-explanation"></div>
+      </div>
+
       <div class="item-row" data-key="+" data-reason="Low credit utilization (<10%) and paying in full helps build credit.">
         <div class="item-main">
           <span class="item-text">Credit Card #1: $200 balance (limit $3,000) – pays in full most months</span>
@@ -661,13 +724,33 @@
     <div class="case-header">
       <h2>Case #3: Taylor – 26 year old Victim of Identity Theft 🕵️</h2>
     </div>
-    <div class="profile-info">
-      <p><strong>Job:</strong> Software Developer ($4,500/month income)</p>
-      <p><strong>Monthly Expenses:</strong> $3,850</p>
-    </div>
 
     <div class="items-list">
-      <div class="item-row" data-key="+" data-reason="Paying credit cards in full and keeping balance low optimizes credit score.">
+      <div class="item-row income-row" data-key="N" data-reason="INCOME HAS NO IMPACT: Salary as a software developer ($4,500) has zero effect on credit scores.">
+        <div class="item-main">
+          <span class="item-text"><strong>Job Income:</strong> Software Developer ($4,500/month income)</span>
+          <div class="pill-group">
+            <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
+            <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
+            <button class="pill-btn" data-val="N" onclick="setPill(this)">N</button>
+          </div>
+        </div>
+        <div class="item-explanation"></div>
+      </div>
+
+      <div class="item-row income-row" data-key="N" data-reason="EXPENSES HAVE NO IMPACT: Personal budget expenses ($3,850) do NOT calculate into credit scores.">
+        <div class="item-main">
+          <span class="item-text"><strong>Monthly Expenses:</strong> $3,850/month</span>
+          <div class="pill-group">
+            <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
+            <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
+            <button class="pill-btn" data-val="N" onclick="setPill(this)">N</button>
+          </div>
+        </div>
+        <div class="item-explanation"></div>
+      </div>
+
+      <div class="item-row" data-key="+" data-reason="Paying credit cards in full and keeping balance low helps build credit.">
         <div class="item-main">
           <span class="item-text">Credit Card #1: $500 balance (limit $5,000) – pays in full each month</span>
           <div class="pill-group">
@@ -703,9 +786,9 @@
         <div class="item-explanation"></div>
       </div>
 
-      <div class="item-row" data-key="+" data-reason="Older accounts increase length of credit history (15% of score).">
+      <div class="item-row" data-key="-" data-reason="SEVERE NEGATIVE: Fraudulent credit lines opened by identity thieves create maxed-out debt and default records.">
         <div class="item-main">
-          <span class="item-text">4 years ago: Opened first credit card, always paid on time</span>
+          <span class="item-text">2 years ago: Fraudulent credit cards opened in Taylor's name with maxed balances</span>
           <div class="pill-group">
             <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
             <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
@@ -715,9 +798,9 @@
         <div class="item-explanation"></div>
       </div>
 
-      <div class="item-row" data-key="+" data-reason="3 years of clean auto loan history builds credit age and mix.">
+      <div class="item-row" data-key="-" data-reason="SEVERE NEGATIVE: Unpaid fraudulent accounts went to collection agencies, causing a severe drop in score.">
         <div class="item-main">
-          <span class="item-text">3 years ago: Took out a car loan, made all payments on time</span>
+          <span class="item-text">1 year ago: Fraudulent accounts reported multiple missed payments & collections</span>
           <div class="pill-group">
             <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
             <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
@@ -727,33 +810,9 @@
         <div class="item-explanation"></div>
       </div>
 
-      <div class="item-row" data-key="-" data-reason="Fraudulent accounts create unauthorized debt/defaults that temporarily harm score.">
+      <div class="item-row" data-key="+" data-reason="Disputing fraud and clearing stolen debts slowly begins rebuilding credit score.">
         <div class="item-main">
-          <span class="item-text">2 years ago: Discovered severe fraud on accounts opened in their name</span>
-          <div class="pill-group">
-            <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
-            <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
-            <button class="pill-btn" data-val="N" onclick="setPill(this)">N</button>
-          </div>
-        </div>
-        <div class="item-explanation"></div>
-      </div>
-
-      <div class="item-row" data-key="+" data-reason="Removing fraudulent marks restores credit standing over time.">
-        <div class="item-main">
-          <span class="item-text">1 year ago: Resolved identity theft issues but still rebuilding credit</span>
-          <div class="pill-group">
-            <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
-            <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
-            <button class="pill-btn" data-val="N" onclick="setPill(this)">N</button>
-          </div>
-        </div>
-        <div class="item-explanation"></div>
-      </div>
-
-      <div class="item-row" data-key="+" data-reason="Keeping credit utilization under 10% boosts amounts owed score category.">
-        <div class="item-main">
-          <span class="item-text">Keeps credit utilization low (under 10%)</span>
+          <span class="item-text">Currently: Filed police report & disputing fraud, actively rebuilding credit</span>
           <div class="pill-group">
             <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
             <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
@@ -797,7 +856,7 @@
         <button class="range-btn" onclick="selectRange('case3', 'Very Good')">Very Good (740 - 799)</button>
         <button class="range-btn" onclick="selectRange('case3', 'Excellent')">Excellent (800 - 850)</button>
       </div>
-      <button class="action-btn" onclick="checkCase('case3', 'Very Good', '750')">Check Case #3 Answers</button>
+      <button class="action-btn" onclick="checkCase('case3', 'Poor', '520')">Check Case #3 Answers</button>
       <div class="case-feedback" id="feedback-case3"></div>
     </div>
   </div>
@@ -807,13 +866,33 @@
     <div class="case-header">
       <h2>Case #4: Morgan – 30 year old Credit Master 💳</h2>
     </div>
-    <div class="profile-info">
-      <p><strong>Job:</strong> Marketing Manager ($5,000/month income)</p>
-      <p><strong>Monthly Expenses:</strong> $3,800</p>
-    </div>
 
     <div class="items-list">
-      <div class="item-row" data-key="+" data-reason="10% utilization paid in full maintains excellent credit standing.">
+      <div class="item-row income-row" data-key="N" data-reason="INCOME HAS NO IMPACT: $5,000 monthly income as a marketing manager is NOT part of credit score math.">
+        <div class="item-main">
+          <span class="item-text"><strong>Job Income:</strong> Marketing Manager ($5,000/month income)</span>
+          <div class="pill-group">
+            <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
+            <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
+            <button class="pill-btn" data-val="N" onclick="setPill(this)">N</button>
+          </div>
+        </div>
+        <div class="item-explanation"></div>
+      </div>
+
+      <div class="item-row income-row" data-key="N" data-reason="EXPENSES HAVE NO IMPACT: Personal monthly expenses ($3,800) are NOT tracked on credit reports.">
+        <div class="item-main">
+          <span class="item-text"><strong>Monthly Expenses:</strong> $3,800/month</span>
+          <div class="pill-group">
+            <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
+            <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
+            <button class="pill-btn" data-val="N" onclick="setPill(this)">N</button>
+          </div>
+        </div>
+        <div class="item-explanation"></div>
+      </div>
+
+      <div class="item-row" data-key="+" data-reason="Low utilization (10%) paid in full maintains excellent credit standing.">
         <div class="item-main">
           <span class="item-text">Credit Card #1: $500 balance (limit $5,000) – pays in full each month</span>
           <div class="pill-group">
@@ -825,9 +904,9 @@
         <div class="item-explanation"></div>
       </div>
 
-      <div class="item-row" data-key="-" data-reason="High balance ($2,800 on $3,000 limit) represents >93% utilization on Card #2.">
+      <div class="item-row" data-key="+" data-reason="Low utilization ($300 balance on $5,000 limit) paid in full yields top score points.">
         <div class="item-main">
-          <span class="item-text">Credit Card #2: $2,800 balance (limit $3,000) – pays in full each month</span>
+          <span class="item-text">Credit Card #2: $300 balance (limit $5,000) – pays in full each month</span>
           <div class="pill-group">
             <button class="pill-btn" data-val="+" onclick="setPill(this)">+</button>
             <button class="pill-btn" data-val="-" onclick="setPill(this)">-</button>
@@ -849,7 +928,7 @@
         <div class="item-explanation"></div>
       </div>
 
-      <div class="item-row" data-key="+" data-reason="Paid-off boat loan demonstrates successful loan repayment.">
+      <div class="item-row" data-key="+" data-reason="Paid-off boat loan demonstrates successful long-term loan repayment.">
         <div class="item-main">
           <span class="item-text">Boat Loan – paid every payment on time, paid off</span>
           <div class="pill-group">
@@ -931,7 +1010,7 @@
         <button class="range-btn" onclick="selectRange('case4', 'Very Good')">Very Good (740 - 799)</button>
         <button class="range-btn" onclick="selectRange('case4', 'Excellent')">Excellent (800 - 850)</button>
       </div>
-      <button class="action-btn" onclick="checkCase('case4', 'Very Good', '790')">Check Case #4 Answers</button>
+      <button class="action-btn" onclick="checkCase('case4', 'Excellent', '825')">Check Case #4 Answers</button>
       <div class="case-feedback" id="feedback-case4"></div>
     </div>
   </div>
@@ -943,10 +1022,14 @@
       <p style="color: var(--text-muted);">Review your total performance across all case investigations.</p>
     </div>
 
+    <div class="watermark" id="dossier-watermark">
+      🔒 <strong>Unverified Report:</strong> Please enter and lock your Name & Period in the top bar.
+    </div>
+
     <div class="dossier-grid">
       <div class="dossier-card">
         <h3>Total Score</h3>
-        <div class="val" id="total-score-val">0 / 44</div>
+        <div class="val" id="total-score-val">0 / 51</div>
       </div>
       <div class="dossier-card">
         <h3>Accuracy</h3>
@@ -965,6 +1048,28 @@
 <script>
   const selectedRanges = {};
   const caseResults = { case1: 0, case2: 0, case3: 0, case4: 0 };
+  let isInfoLocked = false;
+
+  function lockStudentInfo() {
+    const nameInput = document.getElementById('student-name');
+    const periodInput = document.getElementById('student-period');
+    const lockBtn = document.getElementById('lock-btn');
+
+    if (!nameInput.value.trim()) {
+      alert('Please enter your full name before locking!');
+      return;
+    }
+
+    nameInput.disabled = true;
+    periodInput.disabled = true;
+    lockBtn.innerText = '🔒 Locked';
+    lockBtn.style.background = 'var(--success)';
+    lockBtn.style.color = '#000';
+    lockBtn.disabled = true;
+    isInfoLocked = true;
+
+    updateSummary();
+  }
 
   function setPill(btn) {
     const group = btn.closest('.pill-group');
@@ -1032,8 +1137,20 @@
 
   function updateSummary() {
     const total = caseResults.case1 + caseResults.case2 + caseResults.case3 + caseResults.case4;
-    const max = 44;
+    const max = 51; // 47 line items + 4 case range scores
     const pct = Math.round((total / max) * 100);
+
+    const nameVal = document.getElementById('student-name').value || 'Anonymous';
+    const periodVal = document.getElementById('student-period').value || 'Unassigned';
+
+    const watermark = document.getElementById('dossier-watermark');
+    if (isInfoLocked) {
+      watermark.innerHTML = `✅ <strong>OFFICIAL VERIFIED DOSSIER:</strong> ${nameVal} | Period: ${periodVal} <br><span style="font-size:0.75rem; color:var(--text-muted);">Timestamped & Locked for Submission</span>`;
+      watermark.style.borderColor = 'var(--success)';
+      watermark.style.background = 'rgba(34, 197, 94, 0.1)';
+    } else {
+      watermark.innerHTML = `🔒 <strong>UNLOCKED DOSSIER:</strong> ${nameVal} | Period: ${periodVal} <br><span style="font-size:0.75rem; color:var(--warning);">Lock your name in the top bar to verify this report.</span>`;
+    }
 
     document.getElementById('total-score-val').innerText = `${total} / ${max}`;
     document.getElementById('total-acc-val').innerText = `${pct}%`;
