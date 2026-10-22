@@ -1029,7 +1029,7 @@
     <div class="dossier-grid">
       <div class="dossier-card">
         <h3>Total Score</h3>
-        <div class="val" id="total-score-val">0 / 51</div>
+        <div class="val" id="total-score-val">0 / 50</div>
       </div>
       <div class="dossier-card">
         <h3>Accuracy</h3>
@@ -1137,7 +1137,7 @@
 
   function updateSummary() {
     const total = caseResults.case1 + caseResults.case2 + caseResults.case3 + caseResults.case4;
-    const max = 51; // 47 line items + 4 case range scores
+    const max = document.querySelectorAll('.item-row').length + 4; // 46 line items + 4 case range scores = 50 total
     const pct = Math.round((total / max) * 100);
 
     const nameVal = document.getElementById('student-name').value || 'Anonymous';
