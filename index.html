@@ -216,6 +216,11 @@
       transition: all 0.15s;
     }
 
+    .pill-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
     .pill-btn.selected[data-val="+"] { background: var(--success); color: #000; }
     .pill-btn.selected[data-val="-"] { background: var(--danger); color: #fff; }
     .pill-btn.selected[data-val="N"] { background: var(--warning); color: #000; }
@@ -262,6 +267,11 @@
       font-weight: 500;
     }
 
+    .range-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
     .range-btn.selected {
       border-color: var(--accent);
       background: rgba(56, 189, 248, 0.2);
@@ -281,6 +291,13 @@
     }
 
     .action-btn:hover { background: var(--accent-hover); }
+
+    .action-btn:disabled {
+      background: var(--card-inner);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      cursor: not-allowed;
+    }
 
     .case-feedback {
       display: none;
@@ -357,7 +374,7 @@
       <li><strong>Step 1:</strong> Enter and lock your full name and class period below.</li>
       <li><strong>Step 2:</strong> Evaluate every line item—including income and monthly expenses—and mark them as <strong>+</strong> (Positive), <strong>-</strong> (Negative), or <strong>N</strong> (No Impact).</li>
       <li><strong>Step 3:</strong> Select the estimated Credit Score Range for each suspect.</li>
-      <li><strong>Step 4:</strong> Click <strong>"Check Case Answers"</strong> to get detailed feedback and generate your final Summary Dossier.</li>
+      <li><strong>Step 4:</strong> Click <strong>"Check Case Answers"</strong> to lock in your responses, view detailed feedback, and generate your final Summary Dossier.</li>
     </ul>
   </div>
 
@@ -548,7 +565,7 @@
         <button class="range-btn" onclick="selectRange('case1', 'Very Good')">Very Good (740 - 799)</button>
         <button class="range-btn" onclick="selectRange('case1', 'Excellent')">Excellent (800 - 850)</button>
       </div>
-      <button class="action-btn" onclick="checkCase('case1', 'Poor', '540')">Check Case #1 Answers</button>
+      <button class="action-btn" id="btn-case1" onclick="checkCase('case1', 'Poor', '540')">Check Case #1 Answers</button>
       <div class="case-feedback" id="feedback-case1"></div>
     </div>
   </div>
@@ -714,7 +731,7 @@
         <button class="range-btn" onclick="selectRange('case2', 'Very Good')">Very Good (740 - 799)</button>
         <button class="range-btn" onclick="selectRange('case2', 'Excellent')">Excellent (800 - 850)</button>
       </div>
-      <button class="action-btn" onclick="checkCase('case2', 'Poor', '570')">Check Case #2 Answers</button>
+      <button class="action-btn" id="btn-case2" onclick="checkCase('case2', 'Poor', '570')">Check Case #2 Answers</button>
       <div class="case-feedback" id="feedback-case2"></div>
     </div>
   </div>
@@ -856,7 +873,7 @@
         <button class="range-btn" onclick="selectRange('case3', 'Very Good')">Very Good (740 - 799)</button>
         <button class="range-btn" onclick="selectRange('case3', 'Excellent')">Excellent (800 - 850)</button>
       </div>
-      <button class="action-btn" onclick="checkCase('case3', 'Poor', '520')">Check Case #3 Answers</button>
+      <button class="action-btn" id="btn-case3" onclick="checkCase('case3', 'Poor', '520')">Check Case #3 Answers</button>
       <div class="case-feedback" id="feedback-case3"></div>
     </div>
   </div>
@@ -1010,7 +1027,7 @@
         <button class="range-btn" onclick="selectRange('case4', 'Very Good')">Very Good (740 - 799)</button>
         <button class="range-btn" onclick="selectRange('case4', 'Excellent')">Excellent (800 - 850)</button>
       </div>
-      <button class="action-btn" onclick="checkCase('case4', 'Excellent', '825')">Check Case #4 Answers</button>
+      <button class="action-btn" id="btn-case4" onclick="checkCase('case4', 'Excellent', '825')">Check Case #4 Answers</button>
       <div class="case-feedback" id="feedback-case4"></div>
     </div>
   </div>
@@ -1048,6 +1065,7 @@
 <script>
   const selectedRanges = {};
   const caseResults = { case1: 0, case2: 0, case3: 0, case4: 0 };
+  const lockedCases = { case1: false, case2: false, case3: false, case4: false };
   let isInfoLocked = false;
 
   function lockStudentInfo() {
@@ -1072,6 +1090,9 @@
   }
 
   function setPill(btn) {
+    const card = btn.closest('.case-card');
+    if (lockedCases[card.id]) return; // Block changes after case submission
+
     const group = btn.closest('.pill-group');
     group.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
@@ -1088,15 +1109,29 @@
   }
 
   function selectRange(caseId, value) {
+    if (lockedCases[caseId]) return; // Block changes after case submission
+
     selectedRanges[caseId] = value;
     const container = document.getElementById(`range-${caseId}`);
     container.querySelectorAll('.range-btn').forEach(btn => {
       btn.classList.remove('selected');
-      if (btn.innerText.includes(value)) btn.classList.add('selected');
+      const btnText = btn.innerText.trim();
+      // Strict matching logic so Good/Very Good/Excellent don't overlap
+      if (
+        (value === 'Poor' && btnText.startsWith('Poor')) ||
+        (value === 'Fair' && btnText.startsWith('Fair')) ||
+        (value === 'Good' && btnText.startsWith('Good')) ||
+        (value === 'Very Good' && btnText.startsWith('Very Good')) ||
+        (value === 'Excellent' && btnText.startsWith('Excellent'))
+      ) {
+        btn.classList.add('selected');
+      }
     });
   }
 
   function checkCase(caseId, correctRange, actualScore) {
+    if (lockedCases[caseId]) return;
+
     const card = document.getElementById(caseId);
     const rows = card.querySelectorAll('.item-row');
     let correctItems = 0;
@@ -1116,13 +1151,25 @@
         explanation.innerText = `❌ Incorrect (${userVal || 'Unanswered'}). Correct: "${keyVal}". Why: ${row.dataset.reason}`;
         explanation.classList.add('show');
       }
+
+      // Disable pill buttons once checked
+      row.querySelectorAll('.pill-btn').forEach(btn => btn.disabled = true);
     });
+
+    // Disable range buttons once checked
+    card.querySelectorAll('.range-btn').forEach(btn => btn.disabled = true);
 
     const userRange = selectedRanges[caseId] || 'None';
     const rangeCorrect = (userRange === correctRange);
     const rangePts = rangeCorrect ? 1 : 0;
 
     caseResults[caseId] = correctItems + rangePts;
+    lockedCases[caseId] = true;
+
+    // Lock Submit Button
+    const actionBtn = document.getElementById(`btn-${caseId}`);
+    actionBtn.innerText = '🔒 Case Investigation Locked & Submitted';
+    actionBtn.disabled = true;
 
     const feedback = document.getElementById(`feedback-${caseId}`);
     feedback.classList.add('show');
